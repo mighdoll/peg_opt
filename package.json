@@ -1,9 +1,9 @@
 {
   "name": "micro-parse",
   "devDependencies": {
-    "@vitest/ui": "^2.1.4",
-    "tsc": "^2.0.4",
-    "vitest": "^2.1.5"
+    "@vitest/ui": "^2.1.8",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
   },
   "dependencies": {
     "mini-parse": "0.5.0-d1"
