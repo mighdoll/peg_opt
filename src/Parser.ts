@@ -103,6 +103,16 @@ export function seq<P extends ParserArg[]>(...args: P): Parser<SeqValues<P>> {
 
   return new Parser(parseSeq);
 }
+
+/** a parser that returns its arguments */
+export function fn<P>(toParser: () => Parser<P>) {
+  function parseFn(lexer: Lexer): P | null {
+    const parser = toParser();
+    return parser._run(lexer);
+  }
+  return new Parser(parseFn);
+}
+
 /**
  * Convert a parser argument to a parser
  * . A parser argument is passed through unchanged.
