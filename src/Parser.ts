@@ -22,7 +22,13 @@ import { tokens } from "./SimpleLexer.ts";
 
 /** A parser combinator. */
 export class Parser<T> {
-  constructor(readonly fn: (lexer: Lexer) => T | null) {}
+  _children: Parser<any>[] = []; // keep track of children, not needed for interpeter, but probably handy for compiler?
+  _fn?: () => Parser<T>; // track deferred initializers, not needed for interpreter, but probably handy for compiler?
+
+  constructor(
+    readonly fn: (lexer: Lexer) => T | null,
+    readonly debugName = "parser"
+  ) {}
 
   /** parse a source string */
   parse(src: string): T | null {
@@ -48,7 +54,7 @@ export function text(t: string): Parser<string> {
     return lexer.next()?.text === t ? t : null;
   }
 
-  return new Parser(parseText);
+  return new Parser(parseText, `'${t}'`);
 }
 
 /** a Parser that matches tokens of a certain kind (e.g. digits) */
@@ -58,7 +64,7 @@ export function kind(tokenKind: string): Parser<string> {
     return token?.kind === tokenKind ? token.text : null;
   }
 
-  return new Parser(parseKind);
+  return new Parser(parseKind, `kind(${tokenKind})`);
 }
 
 /**
@@ -70,8 +76,8 @@ export function kind(tokenKind: string): Parser<string> {
 export function or<P extends ParserArg[]>(
   ...args: P
 ): Parser<ParserType<ArgToParser<P[number]>> | null> {
+  const parsers = args.map(argToParser);
   function parseOr(lexer: Lexer) {
-    const parsers = args.map(argToParser);
     for (const p of parsers) {
       const value = p._run(lexer);
       if (value !== null) return value;
@@ -79,7 +85,9 @@ export function or<P extends ParserArg[]>(
     return null;
   }
 
-  return new Parser(parseOr);
+  const orParser = new Parser(parseOr, "or");
+  orParser._children = parsers;
+  return orParser;
 }
 
 /**
@@ -89,9 +97,9 @@ export function or<P extends ParserArg[]>(
  * null if one of them didn't match.
  */
 export function seq<P extends ParserArg[]>(...args: P): Parser<SeqValues<P>> {
+  const parsers = args.map(argToParser);
   /** return an array of parsed results, or null if any fails */
   function parseSeq(lexer: Lexer): SeqValues<P> | null {
-    const parsers = args.map(argToParser);
     const results = [] as any;
     for (const p of parsers) {
       const value = p._run(lexer);
@@ -101,7 +109,9 @@ export function seq<P extends ParserArg[]>(...args: P): Parser<SeqValues<P>> {
     return results;
   }
 
-  return new Parser(parseSeq);
+  const seqParser = new Parser(parseSeq, "seq");
+  seqParser._children = parsers;
+  return seqParser;
 }
 
 /** a parser that returns its arguments */
@@ -110,7 +120,9 @@ export function fn<P>(toParser: () => Parser<P>) {
     const parser = toParser();
     return parser._run(lexer);
   }
-  return new Parser(parseFn);
+  const fnParser = new Parser(parseFn, "fn");
+  fnParser._fn = toParser;
+  return fnParser;
 }
 
 /**
