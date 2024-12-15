@@ -1,5 +1,6 @@
 import { expect, test } from "vitest";
-import { or, seq, text } from "../Parser.ts";
+import { kind, or, repeat, seq, text } from "../Parser.ts";
+import { printParser } from "../PrintParser.ts";
 
 test("text parser", () => {
   const a = text("a");
@@ -21,3 +22,10 @@ test("or parser", () => {
 
   expect(result).toEqual("b");
 });
+
+test("repeat ", () => {
+  const s = repeat("a");
+  const result = s.parse("a a");
+  expect(result).toEqual(["a", "a"]);
+});
+

@@ -108,6 +108,24 @@ export function seq<P extends ParserArg[]>(...args: P) {
   return seqParser;
 }
 
+export function repeat<A extends ParserArg>(arg: A) {
+  const parser = argToParser(arg);
+
+  function parseRepeat(lexer: Lexer) {
+    const allResults: ArgToReturn<A>[] = [];
+    while (true) {
+      const result = parser._run(lexer);
+      if (result === null) break;
+      allResults.push(result);
+    }
+    return allResults;
+  }
+
+  const repeatParser = new Parser(parseRepeat, "repeat");
+  repeatParser._children = [parser];
+  return repeatParser;
+}
+
 /** a parser that returns its arguments */
 export function fn<P>(toParser: () => Parser<P>) {
   function parseFn(lexer: Lexer): P | null {
