@@ -1,10 +1,5 @@
 import { Lexer, matchingLexer } from "mini-parse";
-import {
-  ArgToParser,
-  ParserArg,
-  ParserType,
-  SeqValues,
-} from "./ParserTypes.ts";
+import { ArgToReturn, ParserArg } from "./ParserTypes.ts";
 import { tokens } from "./SimpleLexer.ts";
 
 /*
@@ -73,9 +68,7 @@ export function kind(tokenKind: string): Parser<string> {
  * and the result from the first match is returned,
  * or null if none of the parsers match.
  */
-export function or<P extends ParserArg[]>(
-  ...args: P
-): Parser<ParserType<ArgToParser<P[number]>> | null> {
+export function or<P extends ParserArg[]>(...args: P) {
   const parsers = args.map(argToParser);
   function parseOr(lexer: Lexer) {
     for (const p of parsers) {
@@ -96,10 +89,11 @@ export function or<P extends ParserArg[]>(
  * The result is an array of the parsers results, or
  * null if one of them didn't match.
  */
-export function seq<P extends ParserArg[]>(...args: P): Parser<SeqValues<P>> {
+export function seq<P extends ParserArg[]>(...args: P) {
   const parsers = args.map(argToParser);
+
   /** return an array of parsed results, or null if any fails */
-  function parseSeq(lexer: Lexer): SeqValues<P> | null {
+  function parseSeq(lexer: Lexer) {
     const results = [] as any;
     for (const p of parsers) {
       const value = p._run(lexer);
@@ -134,12 +128,12 @@ export function fn<P>(toParser: () => Parser<P>) {
  * (this is just for convenience so grammar authors don't have to write out
  *  text() and fn() all the time.)
  */
-export function argToParser(arg: ParserArg): ArgToParser<typeof arg> {
+export function argToParser<A extends ParserArg>(arg: A) {
   if (typeof arg === "function") {
-    return fn(arg);
+    return fn(arg) as any;
   } else if (typeof arg === "string") {
-    return text(arg);
+    return text(arg) as any;
   } else {
-    return arg;
+    return arg as any;
   }
 }

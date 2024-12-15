@@ -10,14 +10,14 @@ import { Parser } from "./Parser.ts";
  * and sucks out the type arguments to return the type [string, number].
  */
 export type SeqValues<P extends ParserArg[]> = {
-  [key in keyof P]: ParserType<ArgToParser<P[key]>>;
+  [key in keyof P]: ArgToReturn<P[key]>;
 };
 
 // prettier-ignore
 /**
  * This takes a type Parser<T> and returns the type T.
  */
-export type ParserType<A extends Parser<any>> = 
+export type ParserReturns<A extends Parser<any>> = 
   A extends Parser<infer R> ? R
   : never;
 
@@ -31,6 +31,15 @@ export type ArgToParser<P> = P extends Parser<P>
   ? P
   : P extends string
   ? Parser<string>
+  : P extends () => Parser<infer R>
+  ? Parser<R>
+  : never;
+
+/** Parser return type from a ParserArg */
+export type ArgToReturn<P> = P extends Parser<infer R>
+  ? R
+  : P extends string
+  ? string
   : P extends () => Parser<infer R>
   ? R
   : never;
