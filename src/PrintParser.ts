@@ -1,24 +1,27 @@
 import { Parser } from "./Parser.ts";
 
 /** log the nested parser structure to the console */
-export function printParser(p: Parser<any>): void {
+export function printParser(p: Parser<any>): string {
   setFnChildrenDeep(p, new Set());
-  printDeep(p, 0, new Set());
+  const lines: string[] = [];
+  printDeep(p, 0, new Set(), lines);
+  return lines.join("\n");
 }
 
 /** traverse parser graph defined by _children and print all parser debug names */
 function printDeep(
   p: Parser<any>,
   indent: number,
-  visited: Set<Parser<any>>
+  visited: Set<Parser<any>>,
+  lines: string[] = []
 ): void {
   const pad = " ".repeat(indent);
   if (visited.has(p)) {
-    console.log(pad + "->" + p.debugName);
+    lines.push(pad + "->" + p.debugName);
   } else {
     visited.add(p);
-    console.log(pad + p.debugName);
-    p._children?.forEach((c) => printDeep(c, indent + 2, visited));
+    lines.push(pad + p.debugName);
+    p._children?.forEach((c) => printDeep(c, indent + 2, visited, lines));
   }
 }
 
