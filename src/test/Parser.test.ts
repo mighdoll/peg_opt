@@ -47,6 +47,31 @@ test("pretty", () => {
 
 test("expression parser", () => {
   const result = statements.parse("a > 7 || b < 4;");
-  console.log(JSON.stringify(result, null, 3));
-  expect(result).toBeDefined();
+  // console.log(JSON.stringify(result, null, 3));
+  expect(JSON.stringify(result)).toContain(";");
+});
+
+test("expression parser parens", () => {
+  const result = statements.parse("(a << 7) + 4;");
+  // console.log(JSON.stringify(result, null, 3));
+  expect(JSON.stringify(result)).toContain(";");
+});
+
+test("expression parser variation", () => {
+  const result = statements.parse("a(b() + 4, 9) && true || 9;");
+  // console.log(JSON.stringify(result, null, 3));
+  expect(JSON.stringify(result)).toContain(";");
+});
+
+test("expression parser calls", () => {
+  const result = statements.parse("a(b());");
+  // console.log(JSON.stringify(result, null, 3));
+  expect(JSON.stringify(result)).toContain(";");
+});
+
+test("pretty expression parser", () => {
+  const pretty = printParser(statements);
+  // console.log(pretty)
+});
+
 });
