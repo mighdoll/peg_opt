@@ -74,4 +74,13 @@ test("pretty expression parser", () => {
   // console.log(pretty)
 });
 
+test("long expression parses correctly", () => {
+  const result = statements.parse(benchExpression);
+  const expectedSemis = countSemicolons(benchExpression);
+  const foundSemis = countSemicolons(JSON.stringify(result));
+  expect(foundSemis).toBe(expectedSemis);
 });
+
+function countSemicolons(s: string): number {
+  return [...s.matchAll(/;/g)].length;
+}
