@@ -1,7 +1,9 @@
 import { expect, test } from "vitest";
+import { benchExpression } from "../BenchExpression.ts";
 import { statements } from "../ExpressionGrammar.ts";
 import { or, repeat, seq, text } from "../Parser.ts";
 import { printParser } from "../PrintParser.ts";
+import { deeperGrammar } from "../ExpressionGrammarDeeper.ts";
 
 test("text parser", () => {
   const a = text("a");
@@ -76,6 +78,13 @@ test("pretty expression parser", () => {
 
 test("long expression parses correctly", () => {
   const result = statements.parse(benchExpression);
+  const expectedSemis = countSemicolons(benchExpression);
+  const foundSemis = countSemicolons(JSON.stringify(result));
+  expect(foundSemis).toBe(expectedSemis);
+});
+
+test("long expression parses correctly with deep grammar", () => {
+  const result = deeperGrammar.parse(benchExpression);
   const expectedSemis = countSemicolons(benchExpression);
   const foundSemis = countSemicolons(JSON.stringify(result));
   expect(foundSemis).toBe(expectedSemis);

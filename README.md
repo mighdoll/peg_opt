@@ -179,3 +179,15 @@ It'd be nice if PEG could be fast for common grammars, even
 while supporting 
 
 [mini-parse]: https://github.com/wgsl-tooling-wg/wgsl-linker/blob/main/packages/mini-parse/README.md
+
+## Profiling
+
+Launch with:
+
+```sh
+pnpm tsx --inspect-brk bin/bench.ts 
+```
+
+And then launch the chrome debugger and press the green node button, and press play
+to continue execution of the script.
+See instructions [here](https://developer.chrome.com/docs/devtools/performance/nodejs).

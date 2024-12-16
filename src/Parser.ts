@@ -36,6 +36,7 @@ export class Parser<T> {
     const start = lexer.position();
     const result = this.fn(lexer);
     if (result === null) {
+      // console.log("backtracking", this.debugName);
       lexer.position(start); // backtrack on failure
     }
     return result;
