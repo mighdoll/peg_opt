@@ -1,5 +1,6 @@
 import { expect, test } from "vitest";
-import { kind, or, repeat, seq, text } from "../Parser.ts";
+import { statements } from "../ExpressionGrammar.ts";
+import { or, repeat, seq, text } from "../Parser.ts";
 import { printParser } from "../PrintParser.ts";
 
 test("text parser", () => {
@@ -45,22 +46,7 @@ test("pretty", () => {
 });
 
 test("expression parser", () => {
-  const literal = or("true", "false", kind("digits"));
-  const paren_exp = seq("(", () => expression, or(")"));
-  const primary_exp = seq(or(literal, paren_exp));
-  const unary_exp = or(
-    seq(or("!", "&", "*", "-", "~"), () => unary_exp),
-    primary_exp
-  );
-
-  const arg_list = seq("(", () => expression, or(")"));
-  const call_exp = seq(kind("word"), arg_list);
-  const ident = seq(kind("word"));
-
-  const expression = or(unary_exp, primary_exp, call_exp, ident);
-  const statements = repeat(seq(expression, ";"));
-
-  const result = statements.parse("a; b;");
-  console.log(result);
+  const result = statements.parse("a > 7 || b < 4;");
+  console.log(JSON.stringify(result, null, 3));
   expect(result).toBeDefined();
 });

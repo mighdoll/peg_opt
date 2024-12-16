@@ -1,13 +1,19 @@
 import { matchOneOf, tokenMatcher } from "mini-parse";
-const symbolSet =
-  "& && -> @ / ! [ ] { } :: : , == = != >>= >> >= > <<= << <= < % - --" +
-  " . + ++ | || ( ) ; * ~ ^ // /* */ += -= *= /= %= &= |= ^=" +
+
+const binarySymbolSet = 
+  '& | ^ << <= < != == % * / + - && || >> >= >'
+
+const otherSymbolSet =
+  "-> @ ! [ ] { } :: : , = >>= --" +
+  " . ++ | ( ) ; ~ ^ // /* */ += -= *= /= %= &= |= ^=" +
   " _";
-const symbol = matchOneOf(symbolSet);
+const otherSymbol = matchOneOf(otherSymbolSet);
+const binarySymbol = matchOneOf(binarySymbolSet);
 
 /** tokens for a simple lexer */
 export const tokens = tokenMatcher({
-  symbol,
+  binarySymbol,
+  otherSymbol,
   digits: /\d+/,
   word: /\w+/,
   ws: /\s+/,
