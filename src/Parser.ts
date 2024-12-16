@@ -1,6 +1,7 @@
 import { Lexer, matchingLexer } from "mini-parse";
-import { ArgToReturn, ParserArg } from "./ParserTypes.ts";
 import { tokens } from "./SimpleLexer.ts";
+
+export type ParserArg = Parser<any> | string | (() => Parser<any>);
 
 /*
     A basic parser combinator library. 
@@ -113,7 +114,7 @@ export function repeat<A extends ParserArg>(arg: A) {
   const parser = argToParser(arg);
 
   function parseRepeat(lexer: Lexer) {
-    const allResults: ArgToReturn<A>[] = [];
+    const allResults: any[] = [];
     while (true) {
       const result = parser._run(lexer);
       if (result === null) break;
