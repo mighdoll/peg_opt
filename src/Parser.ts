@@ -12,7 +12,7 @@ export type ParserArg = Parser<any> | string | (() => Parser<any>);
     and the Parser internally calls _run() to produce a value. 
 
     Some parsers will call other Parser instances in their _run() methods,
-    enabling grammar authors ot build complicated parsers by combining
+    enabling grammar authors to build complicated parsers by combining
     simple ones with or(), seq() and repeat().
  */
 

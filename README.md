@@ -14,20 +14,60 @@ A grammar in this library is a directed graph of
 parsers.
 More complicated parsers are built by
 combining simpler ones.
-Parsing proceeds by traversing through the graph
-while parsing.
 
-Likely it'd be a lot faster to analyze the parser graph
-and generate some JavaScript, rather than travesing the
+In the current implementation,
+parsing proceeds by traversing through the graph
+while parsing.
+But it'd be a lot faster to analyze the parser graph
+and generate some JavaScript, rather than traversing the
 graph while parsing.
-If PEG can be fast, that'd be useful for us
+If PEG can be fast and small, that'd be useful for us
 and useful for the wider open source communinity too.
+
 Grammar descriptions are much easier to maintain than custom parsers!
 
 The [lua folks](https://www.inf.puc-rio.br/~roberto/docs/peg.pdf)
 seem to be happy with their PEG compiler.
 They compile PEG grammars to a tiny state machine. I
 imagine we'd compile to JavaScript.
+
+[Peggy.js](https://peggyjs.org/) compiles PEG to JavaScript,
+but seems overbuilt for our purposes.
+Its generated parsers seem pretty big and its compiler is also large,
+which makes it difficult to adopt for code size constrained environments.
+Let's see if we can find something smaller and simpler.
+
+## Installing
+
+Install pnpm if you haven't. On mac with homebrew:
+
+```sh
+brew install pnpm 
+```
+
+clone this project, and install its dependencies:
+
+```sh
+pnpm i
+```
+
+run tests:
+
+```sh
+pnpm vitest --ui
+```
+
+run standalone benchmark:
+
+```sh
+pnpm tsx bin/bench.ts
+```
+
+run vitest benchmark:
+
+```sh
+pnpm vitest bench
+```
 
 ## Simple PEG
 
@@ -62,7 +102,7 @@ const result = h.parse("f g b c d b c d f g f g");
 
 ## PEG interpeter
 
-Take a look at [Parser.ts](src/Parser.ts) in this repo.
+Take a look at [Parser.ts](src/Parser.ts).
 
 - Trace through the `text()` parser.
 You can see how its execution flows through the `Parser` class
@@ -98,7 +138,7 @@ const p = or(seq('a', 'b'), seq('c', 'd'));
 
 #### Interpreter
 
-To `p.parse("c")` the current library would start by executing like this:
+To `p.parse("c")` the current implementation would start by executing like this:
 
 ```ts
 or._run() ..
@@ -114,13 +154,15 @@ or._run() ..
         return token === 'c' ? 'c' : null;` }
 ```
 
-That's just part of the execution, and we can already see that there's
-a lot of overhead to get to the actual logic.
+That's just part of the execution. There's
+a lot of function calling overhead to get to the actual logic of checking tokens.
 
-But with a little cleverness, I think we could automatically refactor this.
+And with a little cleverness, I think we could automatically refactor this.
 Notice that both seq() operations are going to read the same `next()` token.
 So a little compiler could generate something that reads the next token
 first, and then decides what to do.
+(And because computer languages are designed to be easy to parse,
+looking ahead just one token should be enough most of the time too.)
 
 #### Compiler
 
@@ -138,6 +180,7 @@ return null;
 ```
 
 The library could generate that JavaScript text for `p` and execute it.
+How much faster would that be?!
 
 ## Profiling
 
@@ -167,25 +210,29 @@ There are many classes of grammar description. LALR, LR, GLR, LL, Earley, PEG, e
 In the JavaScript/TypeScript world,
 Lezer is a good LR implementation,
 Nearley is a good Earley implementation,
-but there's no great PEG implementation as far as I know.
+Peggy is a reasonable PEG implementation, but it's big.
 
 PEG is an interesting grammar class for several reasons.
-One reason is that parsing is easy to understand.
+
+- Parsing is easy to understand.
 It works by recursive descent just like you'd just like you'd probably write parsing code yourself,
 `parse_paragraph` calls `parse_sentence` calls `parse_word`, etc.
 Most other parsing classes generate hard to understand errors
 about 'shift reduce conflict', etc.
-The PEG grammar dialect is unambiguous by construction,
+- The PEG grammar dialect is unambiguous by construction,
 in the same way that language constructions like `||` `&&` and function calls
 are unambiguous.
-
-PEG also maps very nicely to parser combinators
+- PEG allows a very broad class of grammar rules.
+- PEG maps very nicely to parser combinators
 where the grammar is defined in the host language (TypeScript/JavaScript in this case).
 Using the host language for grammar definition is nice because the IDE language tools can help
 and because it makes integrating with the host language easy.
+- PEG can even replace regular expressions. (Though that seems unwise in
+in JavaScript, since optimized regular expressions are built into the browsers.
+Probably better to keep a separate tokenizer that can use regexes as we do here.)
 
-PEG allows a very broad class of grammar rules.
-It'd be nice if PEG could be fast for common case too.
+If PEG could be small and fast, that'd be a win for the ecosystem.
+
 
 [mini-parse]: https://github.com/wgsl-tooling-wg/wgsl-linker/blob/main/packages/mini-parse/README.md
 
