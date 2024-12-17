@@ -31,12 +31,6 @@ seem to be happy with their PEG compiler.
 They compile PEG grammars to a tiny state machine. I
 imagine we'd compile to JavaScript.
 
-[Peggy.js](https://peggyjs.org/) compiles PEG to JavaScript,
-but seems overbuilt for our purposes.
-Its generated parsers seem pretty big and its compiler is also large,
-which makes it difficult to adopt for code size constrained environments.
-Let's see if we can find something smaller and simpler.
-
 ## Installing
 
 Install pnpm if you haven't. On mac with homebrew:
@@ -200,6 +194,19 @@ See instructions [here](https://developer.chrome.com/docs/devtools/performance/n
 You can see the overhead show up in the trace.
 With the larger [WESL grammar],
 an even higher percentage of the time is spent in overhead.
+
+## Other PEG Implementations in JavaScript
+
+[Peggy.js](https://peggyjs.org/) compiles PEG to JavaScript,
+but seems overbuilt for our purposes.
+Its generated parsers seem pretty big and its compiler is also large,
+which makes it difficult to adopt for code size constrained environments.
+Let's see if we can find something smaller and simpler.
+
+[Canopy](https://github.com/jcoglan/canopy/blob/main/src/builders/javascript.js) looks interesting, might be some good ideas in there..
+
+[Ohm.js](https://github.com/ohmjs/ohm) is very slow in tests, so presumably doesn't compile.
+Some cool UI features though..
 
 ## Parsing backgrounder
 
